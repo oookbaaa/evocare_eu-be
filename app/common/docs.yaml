@@ -1,0 +1,70 @@
+openapi: 3.0.0
+info:
+  title: User API
+  description: API for managing users
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3015
+    description: Local development server
+
+paths:
+  /user/{id}:
+    get:
+      summary: Get a user by ID
+      description: Retrieve user details using their unique ID.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []  # Requires authentication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the user
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successfully retrieved user details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "John Doe"
+                  email:
+                    type: string
+                    example: "johndoe@example.com"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Something went wrong"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  # Indicates usage of JWT for authentication
