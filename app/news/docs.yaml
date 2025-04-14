@@ -1,0 +1,405 @@
+openapi: 3.0.0
+info:
+  title: News API
+  description: API endpoints for the News module
+  version: 1.0.0
+tags:
+  - name: News
+    description: Operations for news articles
+paths:
+  /api/news:
+    get:
+      summary: Get all news articles
+      description: Returns a list of all news articles
+      tags:
+        - News
+      responses:
+        '200':
+          description: List of news articles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/News'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new news article
+      description: Creates a new news article
+      tags:
+        - News
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsInput'
+      responses:
+        '201':
+          description: News article created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: News created successfully
+                  data:
+                    $ref: '#/components/schemas/News'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/news/{id}:
+    get:
+      summary: Get a news article by ID
+      description: Returns a news article by ID
+      tags:
+        - News
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: News ID
+      responses:
+        '200':
+          description: News article found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/News'
+        '404':
+          description: News article not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update a news article
+      description: Updates a news article by ID
+      tags:
+        - News
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: News ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsInput'
+      responses:
+        '200':
+          description: News article updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: News updated successfully
+                  data:
+                    $ref: '#/components/schemas/News'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: News article not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a news article
+      description: Deletes a news article by ID
+      tags:
+        - News
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: News ID
+      responses:
+        '200':
+          description: News article deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: News deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: News article not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/news/featured:
+    get:
+      summary: Get featured news articles
+      description: Returns a list of featured news articles
+      tags:
+        - News
+      responses:
+        '200':
+          description: List of featured news articles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/News'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/news/category/{categoryId}:
+    get:
+      summary: Get news articles by category
+      description: Returns news articles filtered by category ID
+      tags:
+        - News
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Category ID
+      responses:
+        '200':
+          description: List of news articles in the category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/News'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    News:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Company Launches New Product
+        subtitle:
+          type: string
+          example: Innovative solution changes the market
+        publish_date:
+          type: string
+          format: date
+          example: '2023-05-15'
+        is_featured:
+          type: boolean
+          example: true
+        content:
+          type: string
+          example: Detailed content of the news article...
+        image_url:
+          type: string
+          example: /uploads/news/product-launch.jpg
+          nullable: true
+        category_id:
+          type: integer
+          example: 1
+          nullable: true
+        category_name:
+          type: string
+          example: Product Updates
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    NewsInput:
+      type: object
+      required:
+        - title
+        - subtitle
+        - publish_date
+        - content
+      properties:
+        title:
+          type: string
+          example: Company Launches New Product
+        subtitle:
+          type: string
+          example: Innovative solution changes the market
+        publish_date:
+          type: string
+          format: date
+          example: '2023-05-15'
+        is_featured:
+          type: boolean
+          example: true
+        content:
+          type: string
+          example: Detailed content of the news article...
+        image_url:
+          type: string
+          example: /uploads/news/product-launch.jpg
+          nullable: true
+        category_id:
+          type: integer
+          example: 1
+          nullable: true
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error message
+        error:
+          type: string
+          example: Detailed error information
+    ValidationError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Validation error
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                example: ''
+              msg:
+                type: string
+                example: Title is required
+              param:
+                type: string
+                example: title
+              location:
+                type: string
+                example: body

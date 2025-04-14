@@ -1,0 +1,317 @@
+openapi: 3.0.0
+info:
+  title: Content API
+  description: API for managing about content sections
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3015
+    description: Local development server
+
+paths:
+  /api/contents:
+    get:
+      summary: Get all content
+      description: Retrieves all content sections.
+      tags:
+        - Content
+      responses:
+        '200':
+          description: Successfully retrieved all content
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Content'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new content
+      description: Creates a new content section. Limited to admin users.
+      tags:
+        - Content
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentInput'
+      responses:
+        '201':
+          description: Successfully created content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '400':
+          description: Bad request - missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/contents/sections:
+    get:
+      summary: Get content sections
+      description: Retrieves all distinct content section names.
+      tags:
+        - Content
+      responses:
+        '200':
+          description: Successfully retrieved content sections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    section:
+                      type: string
+                      example: 'About Us'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/contents/section/{section}:
+    get:
+      summary: Get content by section
+      description: Retrieves content for a specific section.
+      tags:
+        - Content
+      parameters:
+        - name: section
+          in: path
+          description: Section name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved content
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Content'
+        '404':
+          description: No content found for section
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/contents/{id}:
+    get:
+      summary: Get content by ID
+      description: Retrieves a specific content item by ID.
+      tags:
+        - Content
+      parameters:
+        - name: id
+          in: path
+          description: Content ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '404':
+          description: Content not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update content
+      description: Updates a specific content item. Limited to admin users.
+      tags:
+        - Content
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Content ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentInput'
+      responses:
+        '200':
+          description: Successfully updated content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '400':
+          description: Bad request - missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Content not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete content
+      description: Deletes a specific content item. Limited to admin users.
+      tags:
+        - Content
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Content ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully deleted content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Content with ID 1 successfully deleted'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Content not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Content:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        section:
+          type: string
+          example: 'About Us'
+        title:
+          type: string
+          example: 'Our Journey'
+        content:
+          type: string
+          example: 'Our journey began in Tunisia, where we established ourselves as a pioneering force...'
+        order:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ContentInput:
+      type: object
+      required:
+        - section
+        - content
+      properties:
+        section:
+          type: string
+          example: 'About Us'
+        title:
+          type: string
+          example: 'Our Journey'
+        content:
+          type: string
+          example: 'Our journey began in Tunisia, where we established ourselves as a pioneering force...'
+        order:
+          type: integer
+          example: 0
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Error message'
+        error:
+          type: string
+          example: 'Detailed error information'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

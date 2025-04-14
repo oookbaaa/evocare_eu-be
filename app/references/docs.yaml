@@ -1,0 +1,320 @@
+openapi: 3.0.0
+info:
+  title: References API
+  description: API for managing testimonials and client references
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3015
+    description: Local development server
+
+paths:
+
+  /api/references:
+    get:
+      summary: Get all references
+      description: Retrieves all client references/testimonials.
+      tags:
+        - References
+      responses:
+        '200':
+          description: Successfully retrieved references
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reference'
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create a new reference
+      description: Creates a new client reference/testimonial. Limited to admin users.
+      tags:
+        - References
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReferenceInput'
+      responses:
+        '201':
+          description: Successfully created reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reference'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+
+  /api/references/featured:
+    get:
+      summary: Get featured references
+      description: Retrieves featured client references/testimonials.
+      tags:
+        - References
+      responses:
+        '200':
+          description: Successfully retrieved featured references
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reference'
+        '500':
+          description: Internal server error
+
+  /api/references/{id}:
+    get:
+      summary: Get reference by ID
+      description: Retrieves a specific client reference/testimonial by ID.
+      tags:
+        - References
+      parameters:
+        - name: id
+          in: path
+          description: ID of the reference
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reference'
+        '404':
+          description: Reference not found
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update a reference
+      description: Updates a client reference/testimonial. Limited to admin users.
+      tags:
+        - References
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the reference
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReferenceInput'
+      responses:
+        '200':
+          description: Successfully updated reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reference'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Reference not found
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete a reference
+      description: Deletes a client reference/testimonial. Limited to admin users.
+      tags:
+        - References
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the reference
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully deleted reference
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Reference deleted successfully'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Reference not found
+        '500':
+          description: Internal server error
+
+  api/references/complete-data:
+    get:
+      summary: Get complete references data
+      description: Retrieves page content and all references in one call.
+      tags:
+        - Complete Data
+      responses:
+        '200':
+          description: Successfully retrieved complete data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pageContent:
+                    $ref: '#/components/schemas/PageContent'
+                  references:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reference'
+                  featuredReferences:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reference'
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    PageContent:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: 'Our References'
+        subtitle:
+          type: string
+          example: 'What Our Clients Say'
+        description:
+          type: string
+          example: "Our experience speaks for itself. For over five years, we've been the leading provider..."
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PageContentInput:
+      type: object
+      required:
+        - title
+        - subtitle
+        - description
+      properties:
+        title:
+          type: string
+          example: 'Our References'
+        subtitle:
+          type: string
+          example: 'What Our Clients Say'
+        description:
+          type: string
+          example: "Our experience speaks for itself. For over five years, we've been the leading provider..."
+
+    Reference:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        client_name:
+          type: string
+          example: 'Jane Smith'
+        company_name:
+          type: string
+          example: 'Best Vet Clinic'
+        position:
+          type: string
+          example: 'Lead Veterinarian'
+        testimonial:
+          type: string
+          example: 'Working with Evocare has been a fantastic experience...'
+        image_url:
+          type: string
+          example: 'https://example.com/images/jane-smith.jpg'
+        country:
+          type: string
+          example: 'Malta'
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        is_featured:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ReferenceInput:
+      type: object
+      required:
+        - client_name
+        - company_name
+        - position
+        - testimonial
+        - image_url
+        - country
+        - rating
+      properties:
+        client_name:
+          type: string
+          example: 'Jane Smith'
+        company_name:
+          type: string
+          example: 'Best Vet Clinic'
+        position:
+          type: string
+          example: 'Lead Veterinarian'
+        testimonial:
+          type: string
+          example: 'Working with Evocare has been a fantastic experience...'
+        image_url:
+          type: string
+          example: 'https://example.com/images/jane-smith.jpg'
+        country:
+          type: string
+          example: 'Malta'
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        is_featured:
+          type: boolean
+          example: false
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

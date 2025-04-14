@@ -9,14 +9,14 @@ servers:
     description: Local development server
 
 paths:
-  /user/{id}:
+  /api/common/user/{id}:
     get:
       summary: Get a user by ID
       description: Retrieve user details using their unique ID.
       tags:
         - Users
       security:
-        - bearerAuth: []  # Requires authentication
+        - bearerAuth: [] # Requires authentication
       parameters:
         - name: id
           in: path
@@ -25,7 +25,7 @@ paths:
           schema:
             type: integer
       responses:
-        "200":
+        '200':
           description: Successfully retrieved user details
           content:
             application/json:
@@ -37,11 +37,11 @@ paths:
                     example: 1
                   name:
                     type: string
-                    example: "John Doe"
+                    example: 'John Doe'
                   email:
                     type: string
-                    example: "johndoe@example.com"
-        "404":
+                    example: 'johndoe@example.com'
+        '404':
           description: User not found
           content:
             application/json:
@@ -50,8 +50,8 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "User not found"
-        "500":
+                    example: 'User not found'
+        '500':
           description: Internal server error
           content:
             application/json:
@@ -60,11 +60,11 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Something went wrong"
+                    example: 'Something went wrong'
 
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT  # Indicates usage of JWT for authentication
+      bearerFormat: JWT # Indicates usage of JWT for authentication

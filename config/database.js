@@ -1,44 +1,48 @@
-const { Pool } = require("pg");
-const fs = require("fs");
-const path = require("path");
-require("dotenv").config();
+const mysql = require('mysql2/promise');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
 
-// Create a PostgreSQL connection pool
-const pool = new Pool({
+// Create a MySQL connection pool
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
-  max: process.env.DB_POOL_MAX ? parseInt(process.env.DB_POOL_MAX) : 10, // Pool max connections
-  idleTimeoutMillis: process.env.DB_IDLE_TIMEOUT
-    ? parseInt(process.env.DB_IDLE_TIMEOUT)
-    : 30000, // Idle timeout
-  connectionTimeoutMillis: process.env.DB_CONN_TIMEOUT
-    ? parseInt(process.env.DB_CONN_TIMEOUT)
-    : 2000, // Connection timeout
+  connectionLimit: process.env.DB_POOL_MAX
+    ? parseInt(process.env.DB_POOL_MAX)
+    : 10,
+  waitForConnections: true,
+  queueLimit: 0,
 });
 
-// Function to execute a query with transaction management
+// Function to execute a query
 const executeQuery = async (query, params = []) => {
-  const client = await pool.connect();
+  let connection;
   let results;
-  try {
-    await client.query("BEGIN");
 
-    if (process.env.QUERY_LOG === "true") {
-      console.log("Executing Query:", query, params);
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    if (process.env.QUERY_LOG === 'true') {
+      console.log('Executing Query:', query, params);
     }
 
-    const res = await client.query(query, params);
-    results = res.rows;
+    const [rows] = await connection.query(query, params);
+    results = rows;
 
-    await client.query("COMMIT");
+    await connection.commit();
   } catch (error) {
-    await client.query("ROLLBACK");
+    if (connection) {
+      await connection.rollback();
+    }
     throw error;
   } finally {
-    client.release();
+    if (connection) {
+      connection.release();
+    }
   }
 
   return results;
@@ -46,22 +50,35 @@ const executeQuery = async (query, params = []) => {
 
 // Function to run SQL migration files
 const runMigrations = async () => {
-  const migrationsDir = path.join(__dirname, "../db_migrations");
+  const migrationsDir = path.join(__dirname, '../db_migrations');
 
   try {
     const files = fs
       .readdirSync(migrationsDir)
-      .filter((file) => file.endsWith(".sql") && !file.includes("_migrated"));
+      .filter((file) => file.endsWith('.sql') && !file.includes('_migrated'));
 
     for (const file of files) {
       const filePath = path.join(migrationsDir, file);
-      const sql = fs.readFileSync(filePath, "utf-8");
+      const sql = fs.readFileSync(filePath, 'utf-8');
 
       console.log(`Running migration: ${file}`);
 
       try {
-        await executeQuery(sql);
-        const newFileName = `${file.replace(".sql", "")}_migrated.sql`;
+        // For MySQL, we need to execute each statement separately
+        // because MySQL doesn't support executing multiple statements at once
+        // Split by semicolons but ignore semicolons inside string literals
+        const statements = sql
+          .split(';')
+          .map((statement) => statement.trim())
+          .filter((statement) => statement.length > 0);
+
+        for (const statement of statements) {
+          if (statement) {
+            await executeQuery(statement);
+          }
+        }
+
+        const newFileName = `${file.replace('.sql', '')}_migrated.sql`;
         fs.renameSync(filePath, path.join(migrationsDir, newFileName));
         console.log(`Migration completed: ${file} -> ${newFileName}`);
       } catch (err) {
@@ -69,7 +86,7 @@ const runMigrations = async () => {
       }
     }
   } catch (err) {
-    console.error("Error reading migration files:", err.message);
+    console.error('Error reading migration files:', err.message);
   }
 };
 

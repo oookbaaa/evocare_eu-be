@@ -1,0 +1,298 @@
+openapi: 3.0.0
+info:
+  title: Partners Management API
+  description: API for managing partners data including page content and partners list
+  version: 1.0.0
+paths:
+  /api/partners:
+    get:
+      summary: Get all partners
+      description: Retrieves all partners
+      tags:
+        - Partners
+      responses:
+        '200':
+          description: A list of partners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Partner'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create partner
+      description: Creates a new partner
+      tags:
+        - Partners
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerInput'
+      responses:
+        '201':
+          description: Created partner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Partner'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/partners/{id}:
+    get:
+      summary: Get partner by ID
+      description: Retrieves a specific partner
+      tags:
+        - Partners
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Partner ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Partner found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Partner'
+        '404':
+          description: Partner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update partner
+      description: Updates an existing partner
+      tags:
+        - Partners
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Partner ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerInput'
+      responses:
+        '200':
+          description: Updated partner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Partner'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Partner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete partner
+      description: Deletes a specific partner
+      tags:
+        - Partners
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Partner ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Partner deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Partner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    CompletePartnersData:
+      type: object
+      properties:
+        pageContent:
+          $ref: '#/components/schemas/PartnersPageContent'
+        partners:
+          type: array
+          items:
+            $ref: '#/components/schemas/Partner'
+    PartnersPageContent:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier
+        title:
+          type: string
+          description: Page title
+        subtitle:
+          type: string
+          description: Page subtitle
+        description:
+          type: string
+          description: Page description
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    PartnersPageContentInput:
+      type: object
+      required:
+        - title
+        - subtitle
+        - description
+      properties:
+        title:
+          type: string
+          description: Page title
+        subtitle:
+          type: string
+          description: Page subtitle
+        description:
+          type: string
+          description: Page description
+    Partner:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier
+        name:
+          type: string
+          description: Partner name
+        image_url:
+          type: string
+          description: URL to the partner's logo
+        description:
+          type: string
+          description: Partner description
+        website_url:
+          type: string
+          description: URL to the partner's website
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    PartnerInput:
+      type: object
+      required:
+        - name
+        - image_url
+        - description
+        - website_url
+      properties:
+        name:
+          type: string
+          description: Partner name
+        image_url:
+          type: string
+          description: URL to the partner's logo
+        description:
+          type: string
+          description: Partner description
+        website_url:
+          type: string
+          description: URL to the partner's website
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        error:
+          type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

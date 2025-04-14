@@ -8,6 +8,7 @@ const path = require('path');
 const { runMigrations } = require('./config/database');
 
 
+
 dotenv.config()
 const app = express();
 app.use(express.json({limit: "10mb"}));
